@@ -5,172 +5,46 @@
 }
 
 :root {
-    --bg-primary: #1a1a2e;
-    --bg-secondary: #16213e;
-    --bg-tertiary: #0f3460;
-    --text-primary: #e8e8e8;
-    --text-secondary: #b8b8b8;
-    --accent-primary: #00adb5;
-    --accent-secondary: #00d4ff;
-    --border-color: #2a2a3e;
-    --success: #44ff44;
-    --danger: #ff4444;
-    --warning: #ffaa00;
+    --bg-primary: #f5f5f7;
+    --bg-secondary: #ffffff;
+    --bg-tertiary: #e8e8ed;
+    --text-primary: #1d1d1f;
+    --text-secondary: #6e6e73;
+    --accent-primary: #0071e3;
+    --accent-secondary: #0077ed;
+    --border-color: #d2d2d7;
+    --success: #34c759;
+    --danger: #ff3b30;
+    --warning: #ff9500;
+    --canvas-bg: #fafafa;
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    --text-50: #edf7f6;
-    --text-100: #dcefed;
-    --text-200: #b9dfdc;
-    --text-300: #95d0ca;
-    --text-400: #72c0b8;
-    --text-500: #4fb0a6;
-    --text-600: #3f8d85;
-    --text-700: #2f6a64;
-    --text-800: #204643;
-    --text-900: #102321;
-    --text-950: #081211;
 
-    --background-50: #eef7f7;
-    --background-100: #dcefef;
-    --background-200: #b9dfdf;
-    --background-300: #96cfcf;
-    --background-400: #73bfbf;
-    --background-500: #50afaf;
-    --background-600: #408c8c;
-    --background-700: #306969;
-    --background-800: #204646;
-    --background-900: #102323;
-    --background-950: #081111;
-
-    --primary-50: #edf8f7;
-    --primary-100: #dbf0ee;
-    --primary-200: #b6e2de;
-    --primary-300: #92d3cd;
-    --primary-400: #6dc5bc;
-    --primary-500: #49b6ab;
-    --primary-600: #3a9289;
-    --primary-700: #2c6d67;
-    --primary-800: #1d4945;
-    --primary-900: #0f2422;
-    --primary-950: #071211;
-
-    --secondary-50: #edf1f8;
-    --secondary-100: #dbe2f0;
-    --secondary-200: #b6c5e2;
-    --secondary-300: #92a9d3;
-    --secondary-400: #6d8cc5;
-    --secondary-500: #496fb6;
-    --secondary-600: #3a5992;
-    --secondary-700: #2c436d;
-    --secondary-800: #1d2c49;
-    --secondary-900: #0f1624;
-    --secondary-950: #070b12;
-
-    --accent-50: #edeef8;
-    --accent-100: #dbdef0;
-    --accent-200: #b6bde2;
-    --accent-300: #929bd3;
-    --accent-400: #6d7ac5;
-    --accent-500: #4959b6;
-    --accent-600: #3a4792;
-    --accent-700: #2c356d;
-    --accent-800: #1d2449;
-    --accent-900: #0f1224;
-    --accent-950: #070912;
-
-    --bg-primary: var(--background-100);
-    --bg-secondary: var(--background-200);
-    --bg-tertiary: var(--background-300);
-    --text-primary: var(--text-900);
-    --text-secondary: var(--text-700);
-    --accent-primary: var(--primary-500);
-    --accent-secondary: var(--secondary-500);
-    --border-color: var(--background-400);
-    --success: #44ff44;
-    --danger: #ff4444;
-    --warning: #ffaa00;
-  }
-}
 @media (prefers-color-scheme: dark) {
   :root {
-    --text-50: #081211;
-    --text-100: #102321;
-    --text-200: #204643;
-    --text-300: #2f6a64;
-    --text-400: #3f8d85;
-    --text-500: #4fb0a6;
-    --text-600: #72c0b8;
-    --text-700: #95d0ca;
-    --text-800: #b9dfdc;
-    --text-900: #dcefed;
-    --text-950: #edf7f6;
-
-    --background-50: #091111;
-    --background-100: #112222;
-    --background-200: #224444;
-    --background-300: #336666;
-    --background-400: #448888;
-    --background-500: #55aaaa;
-    --background-600: #77bbbb;
-    --background-700: #99cccc;
-    --background-800: #bbdddd;
-    --background-900: #ddeeee;
-    --background-950: #eef6f6;
-
-    --primary-50: #071211;
-    --primary-100: #0f2422;
-    --primary-200: #1d4945;
-    --primary-300: #2c6d67;
-    --primary-400: #3a9289;
-    --primary-500: #49b6ab;
-    --primary-600: #6dc5bc;
-    --primary-700: #92d3cd;
-    --primary-800: #b6e2de;
-    --primary-900: #dbf0ee;
-    --primary-950: #edf8f7;
-
-    --secondary-50: #070b12;
-    --secondary-100: #0f1724;
-    --secondary-200: #1d2d49;
-    --secondary-300: #2c446d;
-    --secondary-400: #3a5a92;
-    --secondary-500: #4971b6;
-    --secondary-600: #6d8dc5;
-    --secondary-700: #92aad3;
-    --secondary-800: #b6c6e2;
-    --secondary-900: #dbe3f0;
-    --secondary-950: #edf1f8;
-
-    --accent-50: #070912;
-    --accent-100: #0f1224;
-    --accent-200: #1d2449;
-    --accent-300: #2c356d;
-    --accent-400: #3a4792;
-    --accent-500: #4959b6;
-    --accent-600: #6d7ac5;
-    --accent-700: #929bd3;
-    --accent-800: #b6bde2;
-    --accent-900: #dbdef0;
-    --accent-950: #edeef8;
-
-    --bg-primary: var(--background-100);
-    --bg-secondary: var(--background-200);
-    --bg-tertiary: var(--background-300);
-    --text-primary: var(--text-900);
-    --text-secondary: var(--text-600);
-    --accent-primary: var(--primary-500);
-    --accent-secondary: var(--secondary-500);
-    --border-color: var(--background-400);
-    --success: #44ff44;
-    --danger: #ff4444;
-    --warning: #ffaa00;
+    --bg-primary: #1c1c1e;
+    --bg-secondary: #2c2c2e;
+    --bg-tertiary: #3a3a3c;
+    --text-primary: #f5f5f7;
+    --text-secondary: #98989d;
+    --accent-primary: #0a84ff;
+    --accent-secondary: #30a8ff;
+    --border-color: #48484a;
+    --success: #32d74b;
+    --danger: #ff453a;
+    --warning: #ff9f0a;
+    --canvas-bg: #000000;
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.5);
   }
 }
 
 body {
-    font-family: 'Courier New', 'Consolas', 'Monaco', monospace;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     background: var(--bg-primary);
     color: var(--text-primary);
     overflow: hidden;
@@ -185,12 +59,14 @@ body {
 header {
     background: var(--bg-secondary);
     padding: 1.5rem 2rem;
-    border-bottom: 2px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+    box-shadow: var(--shadow-sm);
 }
 
 header h1 {
     font-size: 2rem;
-    color: var(--accent-primary);
+    font-weight: 600;
+    color: var(--text-primary);
     margin-bottom: 0.25rem;
 }
 
@@ -208,7 +84,7 @@ header h1 {
 .sidebar {
     width: 320px;
     background: var(--bg-secondary);
-    border-right: 2px solid var(--border-color);
+    border-right: 1px solid var(--border-color);
     padding: 1.5rem;
     overflow-y: auto;
     display: flex;
@@ -218,13 +94,15 @@ header h1 {
 
 .sidebar h2 {
     font-size: 1.3rem;
-    color: var(--accent-primary);
+    font-weight: 600;
+    color: var(--text-primary);
     margin-bottom: 1rem;
 }
 
 .sidebar h3 {
-    font-size: 1.1rem;
-    color: var(--accent-secondary);
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
     margin-bottom: 0.75rem;
 }
 
@@ -242,13 +120,20 @@ header h1 {
 }
 
 .function-item {
-    background: var(--bg-tertiary);
+    background: var(--bg-primary);
     border: 1px solid var(--border-color);
     border-radius: 8px;
-    padding: 0.75rem;
+    padding: 1rem;
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.75rem;
+    transition: all 0.2s ease;
+    box-shadow: var(--shadow-sm);
+}
+
+.function-item:hover {
+    box-shadow: var(--shadow-md);
+    border-color: var(--accent-primary);
 }
 
 .function-header {
@@ -267,18 +152,20 @@ header h1 {
 
 .function-input {
     flex: 1;
-    background: var(--bg-primary);
+    background: var(--bg-secondary);
     border: 1px solid var(--border-color);
-    border-radius: 4px;
-    padding: 0.5rem;
+    border-radius: 6px;
+    padding: 0.625rem;
     color: var(--text-primary);
-    font-family: 'Courier New', monospace;
+    font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', 'Droid Sans Mono', 'Source Code Pro', monospace;
     font-size: 0.95rem;
+    transition: all 0.2s ease;
 }
 
 .function-input:focus {
     outline: none;
     border-color: var(--accent-primary);
+    box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.1);
 }
 
 .function-controls {
@@ -287,24 +174,31 @@ header h1 {
 }
 
 .btn {
-    background: var(--bg-tertiary);
+    background: var(--bg-secondary);
     border: 1px solid var(--border-color);
     color: var(--text-primary);
-    padding: 0.5rem 1rem;
-    border-radius: 4px;
+    padding: 0.625rem 1rem;
+    border-radius: 6px;
     cursor: pointer;
     font-size: 0.9rem;
-    transition: all 0.2s;
+    font-weight: 500;
+    transition: all 0.2s ease;
 }
 
 .btn:hover {
-    background: var(--accent-primary);
-    border-color: var(--accent-primary);
+    background: var(--bg-tertiary);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+}
+
+.btn:active {
+    transform: translateY(0);
 }
 
 .btn-primary {
     background: var(--accent-primary);
     border-color: var(--accent-primary);
+    color: white;
     width: 100%;
 }
 
@@ -321,18 +215,21 @@ header h1 {
 .btn-danger {
     background: var(--danger);
     border-color: var(--danger);
+    color: white;
 }
 
 .btn-danger:hover {
-    background: #cc0000;
-    border-color: #cc0000;
+    background: #e6342a;
+    border-color: #e6342a;
 }
 
 .controls-panel,
 .legend-panel {
-    background: var(--bg-tertiary);
+    background: var(--bg-primary);
     padding: 1rem;
     border-radius: 8px;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-sm);
 }
 
 .control-group {
@@ -347,18 +244,20 @@ header h1 {
 }
 
 .control-group input[type="number"] {
-    background: var(--bg-primary);
+    background: var(--bg-secondary);
     border: 1px solid var(--border-color);
-    border-radius: 4px;
+    border-radius: 6px;
     padding: 0.5rem;
     color: var(--text-primary);
     width: 70px;
     margin: 0 0.25rem;
+    transition: all 0.2s ease;
 }
 
 .control-group input[type="number"]:focus {
     outline: none;
     border-color: var(--accent-primary);
+    box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.1);
 }
 
 .legend-item {
@@ -387,10 +286,11 @@ header h1 {
 }
 
 #graph-canvas {
-    background: var(--background-50);
-    border: 2px solid var(--border-color);
-    border-radius: 8px;
+    background: var(--canvas-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
     cursor: crosshair;
+    box-shadow: var(--shadow-lg);
 }
 
 .tooltip {
@@ -428,11 +328,25 @@ header h1 {
 .info-badge.asymptote {
     background: var(--danger);
     color: white;
+    cursor: help;
+    transition: all 0.2s ease;
+}
+
+.info-badge.asymptote:hover {
+    transform: scale(1.05);
+    box-shadow: var(--shadow-sm);
 }
 
 .info-badge.hole {
     background: var(--warning);
     color: white;
+    cursor: help;
+    transition: all 0.2s ease;
+}
+
+.info-badge.hole:hover {
+    transform: scale(1.05);
+    box-shadow: var(--shadow-sm);
 }
 
 /* Scrollbar styling */
