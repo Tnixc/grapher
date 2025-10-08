@@ -441,17 +441,23 @@ class Grapher {
 
         if (leftLimit.length > 0 && rightLimit.length > 0) {
           const avgLeft = leftLimit.reduce((a, b) => a + b) / leftLimit.length;
-          const avgRight = rightLimit.reduce((a, b) => a + b) / rightLimit.length;
+          const avgRight =
+            rightLimit.reduce((a, b) => a + b) / rightLimit.length;
 
           // Check if limits are finite and converging to the same value
           const limitsClose = Math.abs(avgLeft - avgRight) < 0.5;
-          const limitsFinite = Math.abs(avgLeft) < 1000 && Math.abs(avgRight) < 1000;
+          const limitsFinite =
+            Math.abs(avgLeft) < 1000 && Math.abs(avgRight) < 1000;
 
           // Check if values are stable (not diverging as we get closer)
-          const leftStable = leftLimit.length >= 3 &&
-            Math.abs(leftLimit[0] - leftLimit[leftLimit.length - 1]) < Math.abs(avgLeft) * 0.5;
-          const rightStable = rightLimit.length >= 3 &&
-            Math.abs(rightLimit[0] - rightLimit[rightLimit.length - 1]) < Math.abs(avgRight) * 0.5;
+          const leftStable =
+            leftLimit.length >= 3 &&
+            Math.abs(leftLimit[0] - leftLimit[leftLimit.length - 1]) <
+              Math.abs(avgLeft) * 0.5;
+          const rightStable =
+            rightLimit.length >= 3 &&
+            Math.abs(rightLimit[0] - rightLimit[rightLimit.length - 1]) <
+              Math.abs(avgRight) * 0.5;
 
           if (limitsClose && limitsFinite && leftStable && rightStable) {
             // It's a hole (removable discontinuity)
@@ -516,7 +522,9 @@ class Grapher {
     // Check if left side converges
     if (leftSamples.length >= 3) {
       const avgLeft = leftSamples.reduce((a, b) => a + b) / leftSamples.length;
-      const variance = leftSamples.reduce((sum, val) => sum + Math.pow(val - avgLeft, 2), 0) / leftSamples.length;
+      const variance =
+        leftSamples.reduce((sum, val) => sum + Math.pow(val - avgLeft, 2), 0) /
+        leftSamples.length;
 
       // If variance is low, it's converging
       if (variance < 0.1) {
@@ -530,14 +538,19 @@ class Grapher {
 
     // Check if right side converges
     if (rightSamples.length >= 3) {
-      const avgRight = rightSamples.reduce((a, b) => a + b) / rightSamples.length;
-      const variance = rightSamples.reduce((sum, val) => sum + Math.pow(val - avgRight, 2), 0) / rightSamples.length;
+      const avgRight =
+        rightSamples.reduce((a, b) => a + b) / rightSamples.length;
+      const variance =
+        rightSamples.reduce(
+          (sum, val) => sum + Math.pow(val - avgRight, 2),
+          0,
+        ) / rightSamples.length;
 
       // If variance is low, it's converging
       if (variance < 0.1) {
         // Check if this is different from left asymptote
-        const isDifferent = !func.asymptotes.some(a =>
-          a.type === "horizontal" && Math.abs(a.y - avgRight) < 0.1
+        const isDifferent = !func.asymptotes.some(
+          (a) => a.type === "horizontal" && Math.abs(a.y - avgRight) < 0.1,
         );
 
         if (isDifferent) {
