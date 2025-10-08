@@ -32,13 +32,29 @@ class Grapher {
     }
     
     setupCanvas() {
-        // Set canvas size to fill container while maintaining aspect ratio
+        // Set canvas size to fill container with high DPI support
         const container = this.canvas.parentElement;
-        const maxWidth = container.clientWidth - 80;
-        const maxHeight = container.clientHeight - 80;
+        const dpr = window.devicePixelRatio || 1;
         
-        this.canvas.width = Math.min(maxWidth, 1200);
-        this.canvas.height = Math.min(maxHeight, 800);
+        // Get container dimensions
+        const rect = container.getBoundingClientRect();
+        const width = rect.width - 40;
+        const height = rect.height - 40;
+        
+        // Set display size
+        this.canvas.style.width = width + 'px';
+        this.canvas.style.height = height + 'px';
+        
+        // Set actual size in memory (scaled by DPR for high resolution)
+        this.canvas.width = width * dpr;
+        this.canvas.height = height * dpr;
+        
+        // Scale context to match DPR
+        this.ctx.scale(dpr, dpr);
+        
+        // Store display dimensions for calculations
+        this.displayWidth = width;
+        this.displayHeight = height;
     }
     
     setupEventListeners() {
@@ -107,7 +123,7 @@ class Grapher {
     }
     
     addInitialFunction() {
-        this.addFunction('1/x', true);
+        this.addFunction('1/x', false);
     }
     
     addFunction(expression = '', skipDraw = false) {
@@ -214,13 +230,21 @@ class Grapher {
             // Update info display
             let info = '';
             if (func.asymptotes.length > 0) {
-                const vAsymp = func.asymptotes.filter(a => a.type === 'vertical').length;
-                const hAsymp = func.asymptotes.filter(a => a.type === 'horizontal').length;
-                if (vAsymp > 0) info += `<span class="info-badge asymptote">${vAsymp} V.A.</span>`;
-                if (hAsymp > 0) info += `<span class="info-badge asymptote">${hAsymp} H.A.</span>`;
+                const vAsymp = func.asymptotes.filter(a => a.type === 'vertical');
+                const hAsymp = func.asymptotes.filter(a => a.type === 'horizontal');
+                
+                if (vAsymp.length > 0) {
+                    const vList = vAsymp.map(a => `x=${a.x.toFixed(2)}`).join(', ');
+                    info += `<span class="info-badge asymptote" title="Vertical asymptotes at: ${vList}">${vAsymp.length} V.A.</span>`;
+                }
+                if (hAsymp.length > 0) {
+                    const hList = hAsymp.map(a => `y=${a.y.toFixed(2)}`).join(', ');
+                    info += `<span class="info-badge asymptote" title="Horizontal asymptotes at: ${hList}">${hAsymp.length} H.A.</span>`;
+                }
             }
             if (func.holes.length > 0) {
-                info += `<span class="info-badge hole">${func.holes.length} Hole${func.holes.length > 1 ? 's' : ''}</span>`;
+                const holeList = func.holes.map(h => `(${h.x.toFixed(2)}, ${h.y.toFixed(2)})`).join(', ');
+                info += `<span class="info-badge hole" title="Holes at: ${holeList}">${func.holes.length} Hole${func.holes.length > 1 ? 's' : ''}</span>`;
             }
             this.updateFunctionInfo(func, info);
             
@@ -236,11 +260,27 @@ class Grapher {
     
     normalizeExpression(expr) {
         // Replace common notations
-        return expr
-            .replace(/\^/g, '^')  // Power notation
-            .replace(/(\d)([a-zA-Z(])/g, '$1*$2')  // Implicit multiplication: 2x -> 2*x
-            .replace(/\)(\d)/g, ')*$1')  // )(digit -> )*(digit
-            .replace(/\)\(/g, ')*(');  // )( -> )*(
+        let normalized = expr
+            .replace(/\^/g, '^');  // Power notation
+        
+        // Fix implicit multiplication
+        // Number followed by letter or opening parenthesis: 2x -> 2*x, 2(x+1) -> 2*(x+1)
+        normalized = normalized.replace(/(\d)([a-zA-Z(])/g, '$1*$2');
+        
+        // Closing parenthesis followed by number: )(2 -> )*(2
+        normalized = normalized.replace(/\)(\d)/g, ')*$1');
+        
+        // Closing parenthesis followed by letter: )(x -> )*(x
+        normalized = normalized.replace(/\)([a-zA-Z])/g, ')*$1');
+        
+        // Closing parenthesis followed by opening parenthesis: )( -> )*(
+        normalized = normalized.replace(/\)\(/g, ')*(');
+        
+        // Letter followed by opening parenthesis (but not a function call)
+        // We need to be careful here - sin(x) should stay sin(x), but x(x+1) -> x*(x+1)
+        // This is already handled by the tokenizer treating multi-letter as functions
+        
+        return normalized;
     }
     
     updateFunctionInfo(func, html) {
@@ -271,33 +311,55 @@ class Grapher {
         func.holes = [];
         
         const xRange = this.xMax - this.xMin;
-        const samples = 500;
+        const samples = 1000; // Increased for better detection
         const step = xRange / samples;
         
         // Detect vertical asymptotes and holes
         for (let i = 0; i < samples; i++) {
             const x = this.xMin + i * step;
-            const y1 = this.evaluateFunction(func, x - step * 0.1);
-            const y2 = this.evaluateFunction(func, x);
-            const y3 = this.evaluateFunction(func, x + step * 0.1);
+            const leftX = x - step * 0.5;
+            const rightX = x + step * 0.5;
             
-            // Check for vertical asymptote (sign change with large values)
-            if (y1 !== null && y2 === null && y3 !== null) {
-                const jump = Math.abs(y3 - y1);
-                if (jump > (this.yMax - this.yMin) * 2) {
+            const y1 = this.evaluateFunction(func, leftX);
+            const y2 = this.evaluateFunction(func, x);
+            const y3 = this.evaluateFunction(func, rightX);
+            
+            // Check for vertical asymptote - undefined at point but defined on both sides
+            if (y2 === null && y1 !== null && y3 !== null) {
+                // Check if there's a sign change or large jump
+                const signChange = (y1 > 0 && y3 < 0) || (y1 < 0 && y3 > 0);
+                const largeJump = Math.abs(y3 - y1) > (this.yMax - this.yMin) * 1.5;
+                
+                if (signChange || largeJump) {
                     // Vertical asymptote
                     func.asymptotes.push({
                         type: 'vertical',
                         x: x,
                         y: null
                     });
-                } else if (jump < (this.yMax - this.yMin) * 0.5) {
+                } else if (Math.abs(y3 - y1) < (this.yMax - this.yMin) * 0.5) {
                     // Potential hole (removable discontinuity)
                     const avgY = (y1 + y3) / 2;
                     if (Math.abs(avgY) < Math.abs(this.yMax - this.yMin) * 5) {
                         func.holes.push({
                             x: x,
                             y: avgY
+                        });
+                    }
+                }
+            }
+            
+            // Also check for asymptotes where value goes to infinity
+            if (y1 !== null && y2 !== null && y3 !== null) {
+                if (Math.abs(y2) > Math.abs(this.yMax - this.yMin) * 100) {
+                    const signChange1 = (y1 > 0 && y2 < 0) || (y1 < 0 && y2 > 0);
+                    const signChange2 = (y2 > 0 && y3 < 0) || (y2 < 0 && y3 > 0);
+                    
+                    if (signChange1 || signChange2) {
+                        func.asymptotes.push({
+                            type: 'vertical',
+                            x: x,
+                            y: null
                         });
                     }
                 }
@@ -367,11 +429,11 @@ class Grapher {
     
     draw() {
         const ctx = this.ctx;
-        const width = this.canvas.width;
-        const height = this.canvas.height;
+        const width = this.displayWidth || this.canvas.width;
+        const height = this.displayHeight || this.canvas.height;
         
         // Clear canvas
-        ctx.fillStyle = '#091111';
+        ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--canvas-bg').trim() || '#fafafa';
         ctx.fillRect(0, 0, width, height);
         
         // Draw grid
@@ -392,11 +454,13 @@ class Grapher {
     
     drawGrid() {
         const ctx = this.ctx;
-        const width = this.canvas.width;
-        const height = this.canvas.height;
+        const width = this.displayWidth || this.canvas.width;
+        const height = this.displayHeight || this.canvas.height;
         
-        ctx.strokeStyle = '#224444';
-        ctx.lineWidth = 1;
+        const gridColor = getComputedStyle(document.documentElement).getPropertyValue('--border-color').trim() || '#d2d2d7';
+        ctx.strokeStyle = gridColor;
+        ctx.lineWidth = 0.5;
+        ctx.globalAlpha = 0.3;
         
         // Vertical grid lines
         const xStep = this.getGridStep(this.xMax - this.xMin);
@@ -417,6 +481,8 @@ class Grapher {
             ctx.lineTo(width, py);
             ctx.stroke();
         }
+        
+        ctx.globalAlpha = 1;
     }
     
     getGridStep(range) {
@@ -433,11 +499,12 @@ class Grapher {
     
     drawAxes() {
         const ctx = this.ctx;
-        const width = this.canvas.width;
-        const height = this.canvas.height;
+        const width = this.displayWidth || this.canvas.width;
+        const height = this.displayHeight || this.canvas.height;
         
-        ctx.strokeStyle = '#49b6ab';
-        ctx.lineWidth = 2;
+        const axisColor = getComputedStyle(document.documentElement).getPropertyValue('--text-secondary').trim() || '#6e6e73';
+        ctx.strokeStyle = axisColor;
+        ctx.lineWidth = 1.5;
         
         // X-axis
         if (this.yMin <= 0 && this.yMax >= 0) {
@@ -448,8 +515,8 @@ class Grapher {
             ctx.stroke();
             
             // X-axis labels
-            ctx.fillStyle = '#72c0b8';
-            ctx.font = '12px monospace';
+            ctx.fillStyle = axisColor;
+            ctx.font = '11px system-ui, sans-serif';
             ctx.textAlign = 'center';
             const xStep = this.getGridStep(this.xMax - this.xMin);
             for (let x = Math.ceil(this.xMin / xStep) * xStep; x <= this.xMax; x += xStep) {
@@ -468,8 +535,8 @@ class Grapher {
             ctx.stroke();
             
             // Y-axis labels
-            ctx.fillStyle = '#72c0b8';
-            ctx.font = '12px monospace';
+            ctx.fillStyle = axisColor;
+            ctx.font = '11px system-ui, sans-serif';
             ctx.textAlign = 'right';
             const yStep = this.getGridStep(this.yMax - this.yMin);
             for (let y = Math.ceil(this.yMin / yStep) * yStep; y <= this.yMax; y += yStep) {
@@ -483,8 +550,8 @@ class Grapher {
         if (this.xMin <= 0 && this.xMax >= 0 && this.yMin <= 0 && this.yMax >= 0) {
             const ox = this.xToPixel(0);
             const oy = this.yToPixel(0);
-            ctx.fillStyle = '#72c0b8';
-            ctx.font = '12px monospace';
+            ctx.fillStyle = axisColor;
+            ctx.font = '11px system-ui, sans-serif';
             ctx.textAlign = 'right';
             ctx.fillText('0', ox - 5, oy + 15);
         }
@@ -492,11 +559,11 @@ class Grapher {
     
     drawFunction(func) {
         const ctx = this.ctx;
-        const width = this.canvas.width;
-        const height = this.canvas.height;
+        const width = this.displayWidth || this.canvas.width;
+        const height = this.displayHeight || this.canvas.height;
         
         ctx.strokeStyle = func.color;
-        ctx.lineWidth = 2;
+        ctx.lineWidth = 2.5;
         ctx.beginPath();
         
         let prevY = null;
@@ -504,7 +571,7 @@ class Grapher {
         let pathStarted = false;
         
         const samples = width * 2; // High resolution
-        for (let px = 0; px <= width; px += 1) {
+        for (let px = 0; px <= width; px += 0.5) {
             const x = this.pixelToX(px);
             const y = this.evaluateFunction(func, x);
             
@@ -545,22 +612,22 @@ class Grapher {
     
     drawAsymptotes(func) {
         const ctx = this.ctx;
-        const width = this.canvas.width;
-        const height = this.canvas.height;
+        const width = this.displayWidth || this.canvas.width;
+        const height = this.displayHeight || this.canvas.height;
         
         for (const asymp of func.asymptotes) {
             ctx.setLineDash([5, 5]);
             ctx.lineWidth = 2;
             
             if (asymp.type === 'vertical') {
-                ctx.strokeStyle = '#ff4444';
+                ctx.strokeStyle = '#ff3b30';
                 const px = this.xToPixel(asymp.x);
                 ctx.beginPath();
                 ctx.moveTo(px, 0);
                 ctx.lineTo(px, height);
                 ctx.stroke();
             } else if (asymp.type === 'horizontal') {
-                ctx.strokeStyle = '#44ff44';
+                ctx.strokeStyle = '#34c759';
                 const py = this.yToPixel(asymp.y);
                 ctx.beginPath();
                 ctx.moveTo(0, py);
@@ -574,8 +641,10 @@ class Grapher {
     
     drawHoles(func) {
         const ctx = this.ctx;
+        const width = this.displayWidth || this.canvas.width;
+        const height = this.displayHeight || this.canvas.height;
         
-        ctx.fillStyle = '#ffaa00';
+        ctx.fillStyle = '#ff9500';
         ctx.strokeStyle = '#ffffff';
         ctx.lineWidth = 2;
         
@@ -583,7 +652,7 @@ class Grapher {
             const px = this.xToPixel(hole.x);
             const py = this.yToPixel(hole.y);
             
-            if (px >= 0 && px <= this.canvas.width && py >= 0 && py <= this.canvas.height) {
+            if (px >= 0 && px <= width && py >= 0 && py <= height) {
                 ctx.beginPath();
                 ctx.arc(px, py, 5, 0, Math.PI * 2);
                 ctx.fill();
@@ -593,22 +662,22 @@ class Grapher {
     }
     
     xToPixel(x) {
-        const width = this.canvas.width;
+        const width = this.displayWidth || this.canvas.width;
         return ((x - this.xMin) / (this.xMax - this.xMin)) * width;
     }
     
     yToPixel(y) {
-        const height = this.canvas.height;
+        const height = this.displayHeight || this.canvas.height;
         return height - ((y - this.yMin) / (this.yMax - this.yMin)) * height;
     }
     
     pixelToX(px) {
-        const width = this.canvas.width;
+        const width = this.displayWidth || this.canvas.width;
         return this.xMin + (px / width) * (this.xMax - this.xMin);
     }
     
     pixelToY(py) {
-        const height = this.canvas.height;
+        const height = this.displayHeight || this.canvas.height;
         return this.yMin + ((height - py) / height) * (this.yMax - this.yMin);
     }
     
@@ -646,11 +715,14 @@ class Grapher {
         const dx = e.clientX - this.lastPanX;
         const dy = e.clientY - this.lastPanY;
         
+        const width = this.displayWidth || this.canvas.width;
+        const height = this.displayHeight || this.canvas.height;
+        
         const xRange = this.xMax - this.xMin;
         const yRange = this.yMax - this.yMin;
         
-        const xShift = -(dx / this.canvas.width) * xRange;
-        const yShift = (dy / this.canvas.height) * yRange;
+        const xShift = -(dx / width) * xRange;
+        const yShift = (dy / height) * yRange;
         
         this.xMin += xShift;
         this.xMax += xShift;
