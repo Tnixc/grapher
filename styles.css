@@ -18,8 +18,159 @@
     --warning: #ffaa00;
 }
 
+@media (prefers-color-scheme: light) {
+  :root {
+    --text-50: #edf7f6;
+    --text-100: #dcefed;
+    --text-200: #b9dfdc;
+    --text-300: #95d0ca;
+    --text-400: #72c0b8;
+    --text-500: #4fb0a6;
+    --text-600: #3f8d85;
+    --text-700: #2f6a64;
+    --text-800: #204643;
+    --text-900: #102321;
+    --text-950: #081211;
+
+    --background-50: #eef7f7;
+    --background-100: #dcefef;
+    --background-200: #b9dfdf;
+    --background-300: #96cfcf;
+    --background-400: #73bfbf;
+    --background-500: #50afaf;
+    --background-600: #408c8c;
+    --background-700: #306969;
+    --background-800: #204646;
+    --background-900: #102323;
+    --background-950: #081111;
+
+    --primary-50: #edf8f7;
+    --primary-100: #dbf0ee;
+    --primary-200: #b6e2de;
+    --primary-300: #92d3cd;
+    --primary-400: #6dc5bc;
+    --primary-500: #49b6ab;
+    --primary-600: #3a9289;
+    --primary-700: #2c6d67;
+    --primary-800: #1d4945;
+    --primary-900: #0f2422;
+    --primary-950: #071211;
+
+    --secondary-50: #edf1f8;
+    --secondary-100: #dbe2f0;
+    --secondary-200: #b6c5e2;
+    --secondary-300: #92a9d3;
+    --secondary-400: #6d8cc5;
+    --secondary-500: #496fb6;
+    --secondary-600: #3a5992;
+    --secondary-700: #2c436d;
+    --secondary-800: #1d2c49;
+    --secondary-900: #0f1624;
+    --secondary-950: #070b12;
+
+    --accent-50: #edeef8;
+    --accent-100: #dbdef0;
+    --accent-200: #b6bde2;
+    --accent-300: #929bd3;
+    --accent-400: #6d7ac5;
+    --accent-500: #4959b6;
+    --accent-600: #3a4792;
+    --accent-700: #2c356d;
+    --accent-800: #1d2449;
+    --accent-900: #0f1224;
+    --accent-950: #070912;
+
+    --bg-primary: var(--background-100);
+    --bg-secondary: var(--background-200);
+    --bg-tertiary: var(--background-300);
+    --text-primary: var(--text-900);
+    --text-secondary: var(--text-700);
+    --accent-primary: var(--primary-500);
+    --accent-secondary: var(--secondary-500);
+    --border-color: var(--background-400);
+    --success: #44ff44;
+    --danger: #ff4444;
+    --warning: #ffaa00;
+  }
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --text-50: #081211;
+    --text-100: #102321;
+    --text-200: #204643;
+    --text-300: #2f6a64;
+    --text-400: #3f8d85;
+    --text-500: #4fb0a6;
+    --text-600: #72c0b8;
+    --text-700: #95d0ca;
+    --text-800: #b9dfdc;
+    --text-900: #dcefed;
+    --text-950: #edf7f6;
+
+    --background-50: #091111;
+    --background-100: #112222;
+    --background-200: #224444;
+    --background-300: #336666;
+    --background-400: #448888;
+    --background-500: #55aaaa;
+    --background-600: #77bbbb;
+    --background-700: #99cccc;
+    --background-800: #bbdddd;
+    --background-900: #ddeeee;
+    --background-950: #eef6f6;
+
+    --primary-50: #071211;
+    --primary-100: #0f2422;
+    --primary-200: #1d4945;
+    --primary-300: #2c6d67;
+    --primary-400: #3a9289;
+    --primary-500: #49b6ab;
+    --primary-600: #6dc5bc;
+    --primary-700: #92d3cd;
+    --primary-800: #b6e2de;
+    --primary-900: #dbf0ee;
+    --primary-950: #edf8f7;
+
+    --secondary-50: #070b12;
+    --secondary-100: #0f1724;
+    --secondary-200: #1d2d49;
+    --secondary-300: #2c446d;
+    --secondary-400: #3a5a92;
+    --secondary-500: #4971b6;
+    --secondary-600: #6d8dc5;
+    --secondary-700: #92aad3;
+    --secondary-800: #b6c6e2;
+    --secondary-900: #dbe3f0;
+    --secondary-950: #edf1f8;
+
+    --accent-50: #070912;
+    --accent-100: #0f1224;
+    --accent-200: #1d2449;
+    --accent-300: #2c356d;
+    --accent-400: #3a4792;
+    --accent-500: #4959b6;
+    --accent-600: #6d7ac5;
+    --accent-700: #929bd3;
+    --accent-800: #b6bde2;
+    --accent-900: #dbdef0;
+    --accent-950: #edeef8;
+
+    --bg-primary: var(--background-100);
+    --bg-secondary: var(--background-200);
+    --bg-tertiary: var(--background-300);
+    --text-primary: var(--text-900);
+    --text-secondary: var(--text-600);
+    --accent-primary: var(--primary-500);
+    --accent-secondary: var(--secondary-500);
+    --border-color: var(--background-400);
+    --success: #44ff44;
+    --danger: #ff4444;
+    --warning: #ffaa00;
+  }
+}
+
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Courier New', 'Consolas', 'Monaco', monospace;
     background: var(--bg-primary);
     color: var(--text-primary);
     overflow: hidden;
@@ -236,7 +387,7 @@ header h1 {
 }
 
 #graph-canvas {
-    background: #0a0a14;
+    background: var(--background-50);
     border: 2px solid var(--border-color);
     border-radius: 8px;
     cursor: crosshair;

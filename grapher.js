@@ -14,6 +14,11 @@ class Grapher {
         this.yMin = -10;
         this.yMax = 10;
         
+        // Pan and zoom state
+        this.isPanning = false;
+        this.lastPanX = 0;
+        this.lastPanY = 0;
+        
         // Colors for functions
         this.colors = [
             '#00adb5', '#ff6b6b', '#4ecdc4', '#ffe66d',
@@ -69,11 +74,29 @@ class Grapher {
         
         // Canvas mouse events for tooltip
         this.canvas.addEventListener('mousemove', (e) => {
-            this.handleMouseMove(e);
+            if (this.isPanning) {
+                this.handlePan(e);
+            } else {
+                this.handleMouseMove(e);
+            }
+        });
+        
+        this.canvas.addEventListener('mousedown', (e) => {
+            this.startPan(e);
+        });
+        
+        this.canvas.addEventListener('mouseup', (e) => {
+            this.endPan(e);
         });
         
         this.canvas.addEventListener('mouseleave', () => {
             this.hideTooltip();
+            this.isPanning = false;
+        });
+        
+        // Mouse wheel for zoom
+        this.canvas.addEventListener('wheel', (e) => {
+            this.handleZoom(e);
         });
         
         // Window resize
@@ -348,7 +371,7 @@ class Grapher {
         const height = this.canvas.height;
         
         // Clear canvas
-        ctx.fillStyle = '#0a0a14';
+        ctx.fillStyle = '#091111';
         ctx.fillRect(0, 0, width, height);
         
         // Draw grid
@@ -372,7 +395,7 @@ class Grapher {
         const width = this.canvas.width;
         const height = this.canvas.height;
         
-        ctx.strokeStyle = '#1a1a2e';
+        ctx.strokeStyle = '#224444';
         ctx.lineWidth = 1;
         
         // Vertical grid lines
@@ -413,7 +436,7 @@ class Grapher {
         const width = this.canvas.width;
         const height = this.canvas.height;
         
-        ctx.strokeStyle = '#00adb5';
+        ctx.strokeStyle = '#49b6ab';
         ctx.lineWidth = 2;
         
         // X-axis
@@ -425,7 +448,7 @@ class Grapher {
             ctx.stroke();
             
             // X-axis labels
-            ctx.fillStyle = '#b8b8b8';
+            ctx.fillStyle = '#72c0b8';
             ctx.font = '12px monospace';
             ctx.textAlign = 'center';
             const xStep = this.getGridStep(this.xMax - this.xMin);
@@ -445,7 +468,7 @@ class Grapher {
             ctx.stroke();
             
             // Y-axis labels
-            ctx.fillStyle = '#b8b8b8';
+            ctx.fillStyle = '#72c0b8';
             ctx.font = '12px monospace';
             ctx.textAlign = 'right';
             const yStep = this.getGridStep(this.yMax - this.yMin);
@@ -460,7 +483,7 @@ class Grapher {
         if (this.xMin <= 0 && this.xMax >= 0 && this.yMin <= 0 && this.yMax >= 0) {
             const ox = this.xToPixel(0);
             const oy = this.yToPixel(0);
-            ctx.fillStyle = '#b8b8b8';
+            ctx.fillStyle = '#72c0b8';
             ctx.font = '12px monospace';
             ctx.textAlign = 'right';
             ctx.fillText('0', ox - 5, oy + 15);
@@ -607,6 +630,84 @@ class Grapher {
     hideTooltip() {
         const tooltip = document.getElementById('tooltip');
         tooltip.classList.remove('show');
+    }
+    
+    startPan(e) {
+        this.isPanning = true;
+        this.lastPanX = e.clientX;
+        this.lastPanY = e.clientY;
+        this.canvas.style.cursor = 'grabbing';
+        this.hideTooltip();
+    }
+    
+    handlePan(e) {
+        if (!this.isPanning) return;
+        
+        const dx = e.clientX - this.lastPanX;
+        const dy = e.clientY - this.lastPanY;
+        
+        const xRange = this.xMax - this.xMin;
+        const yRange = this.yMax - this.yMin;
+        
+        const xShift = -(dx / this.canvas.width) * xRange;
+        const yShift = (dy / this.canvas.height) * yRange;
+        
+        this.xMin += xShift;
+        this.xMax += xShift;
+        this.yMin += yShift;
+        this.yMax += yShift;
+        
+        this.lastPanX = e.clientX;
+        this.lastPanY = e.clientY;
+        
+        this.updateViewInputs();
+        this.draw();
+    }
+    
+    endPan(e) {
+        this.isPanning = false;
+        this.canvas.style.cursor = 'crosshair';
+    }
+    
+    handleZoom(e) {
+        e.preventDefault();
+        
+        const rect = this.canvas.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
+        
+        // Get the graph coordinates at mouse position
+        const graphX = this.pixelToX(mouseX);
+        const graphY = this.pixelToY(mouseY);
+        
+        // Zoom factor (smaller = slower zoom)
+        const zoomFactor = e.deltaY > 0 ? 1.1 : 0.9;
+        
+        const xRange = this.xMax - this.xMin;
+        const yRange = this.yMax - this.yMin;
+        
+        const newXRange = xRange * zoomFactor;
+        const newYRange = yRange * zoomFactor;
+        
+        // Calculate the ratio of mouse position in the viewport
+        const xRatio = (graphX - this.xMin) / xRange;
+        const yRatio = (graphY - this.yMin) / yRange;
+        
+        // Adjust bounds to zoom toward mouse position
+        this.xMin = graphX - newXRange * xRatio;
+        this.xMax = graphX + newXRange * (1 - xRatio);
+        this.yMin = graphY - newYRange * yRatio;
+        this.yMax = graphY + newYRange * (1 - yRatio);
+        
+        this.updateViewInputs();
+        this.draw();
+    }
+    
+    updateViewInputs() {
+        document.getElementById('x-min').value = this.xMin.toFixed(2);
+        document.getElementById('x-max').value = this.xMax.toFixed(2);
+        document.getElementById('y-min').value = this.yMin.toFixed(2);
+        document.getElementById('y-max').value = this.yMax.toFixed(2);
     }
 }
 
