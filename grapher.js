@@ -44,8 +44,8 @@ class Grapher {
 
     // Get container dimensions
     const rect = container.getBoundingClientRect();
-    const width = rect.width - 40;
-    const height = rect.height - 40;
+    const width = rect.width;
+    const height = rect.height;
 
     // Set display size
     this.canvas.style.width = width + "px";
@@ -165,7 +165,7 @@ class Grapher {
     item.innerHTML = `
             <div class="function-header">
                 <input type="color" class="function-color" value="${func.color}">
-                <input type="text" class="function-input" placeholder="f(x) = x^2, sin(x), 1/x, etc." value="${func.expression}">
+                <input type="text" class="function-input" placeholder="" value="${func.expression}">
             </div>
             <div class="function-info">
                 <span class="info-text"></span>
@@ -424,28 +424,56 @@ class Grapher {
       const y2 = this.evaluateFunction(func, x);
       const y3 = this.evaluateFunction(func, rightX);
 
-      // Check for vertical asymptote - undefined at point but defined on both sides
+      // Check for discontinuity - undefined at point but defined on both sides
       if (y2 === null && y1 !== null && y3 !== null) {
-        // Check if there's a sign change or large jump
-        const signChange = (y1 > 0 && y3 < 0) || (y1 < 0 && y3 > 0);
-        const largeJump = Math.abs(y3 - y1) > (this.yMax - this.yMin) * 1.5;
+        // Check multiple points very close to x from both sides to determine if it's a hole or asymptote
+        const epsilon = step * 0.01;
+        const leftLimit = [];
+        const rightLimit = [];
 
-        if (signChange || largeJump) {
-          // Vertical asymptote
+        // Sample 5 points on each side getting progressively closer
+        for (let j = 1; j <= 5; j++) {
+          const leftSample = this.evaluateFunction(func, x - epsilon * j);
+          const rightSample = this.evaluateFunction(func, x + epsilon * j);
+          if (leftSample !== null) leftLimit.push(leftSample);
+          if (rightSample !== null) rightLimit.push(rightSample);
+        }
+
+        if (leftLimit.length > 0 && rightLimit.length > 0) {
+          const avgLeft = leftLimit.reduce((a, b) => a + b) / leftLimit.length;
+          const avgRight = rightLimit.reduce((a, b) => a + b) / rightLimit.length;
+
+          // Check if limits are finite and converging to the same value
+          const limitsClose = Math.abs(avgLeft - avgRight) < 0.5;
+          const limitsFinite = Math.abs(avgLeft) < 1000 && Math.abs(avgRight) < 1000;
+
+          // Check if values are stable (not diverging as we get closer)
+          const leftStable = leftLimit.length >= 3 &&
+            Math.abs(leftLimit[0] - leftLimit[leftLimit.length - 1]) < Math.abs(avgLeft) * 0.5;
+          const rightStable = rightLimit.length >= 3 &&
+            Math.abs(rightLimit[0] - rightLimit[rightLimit.length - 1]) < Math.abs(avgRight) * 0.5;
+
+          if (limitsClose && limitsFinite && leftStable && rightStable) {
+            // It's a hole (removable discontinuity)
+            func.holes.push({
+              x: x,
+              y: (avgLeft + avgRight) / 2,
+            });
+          } else {
+            // It's a vertical asymptote
+            func.asymptotes.push({
+              type: "vertical",
+              x: x,
+              y: null,
+            });
+          }
+        } else {
+          // Can't determine both limits, likely an asymptote
           func.asymptotes.push({
             type: "vertical",
             x: x,
             y: null,
           });
-        } else if (Math.abs(y3 - y1) < (this.yMax - this.yMin) * 0.5) {
-          // Potential hole (removable discontinuity)
-          const avgY = (y1 + y3) / 2;
-          if (Math.abs(avgY) < Math.abs(this.yMax - this.yMin) * 5) {
-            func.holes.push({
-              x: x,
-              y: avgY,
-            });
-          }
         }
       }
 
@@ -467,27 +495,59 @@ class Grapher {
     }
 
     // Detect horizontal asymptotes
-    const leftY = this.evaluateFunction(func, this.xMin - 100);
-    const rightY = this.evaluateFunction(func, this.xMax + 100);
+    // Evaluate at large positive and negative x values
+    const farLeft = -10000;
+    const farRight = 10000;
 
-    if (leftY !== null && Math.abs(leftY) < 1000) {
-      func.asymptotes.push({
-        type: "horizontal",
-        x: null,
-        y: leftY,
-      });
+    // Sample multiple points to check convergence
+    const leftSamples = [];
+    const rightSamples = [];
+
+    for (let i = 0; i < 5; i++) {
+      const leftX = farLeft - i * 1000;
+      const rightX = farRight + i * 1000;
+      const leftY = this.evaluateFunction(func, leftX);
+      const rightY = this.evaluateFunction(func, rightX);
+
+      if (leftY !== null && Math.abs(leftY) < 1000) leftSamples.push(leftY);
+      if (rightY !== null && Math.abs(rightY) < 1000) rightSamples.push(rightY);
     }
 
-    if (
-      rightY !== null &&
-      Math.abs(rightY) < 1000 &&
-      Math.abs(rightY - (leftY || 0)) > 0.1
-    ) {
-      func.asymptotes.push({
-        type: "horizontal",
-        x: null,
-        y: rightY,
-      });
+    // Check if left side converges
+    if (leftSamples.length >= 3) {
+      const avgLeft = leftSamples.reduce((a, b) => a + b) / leftSamples.length;
+      const variance = leftSamples.reduce((sum, val) => sum + Math.pow(val - avgLeft, 2), 0) / leftSamples.length;
+
+      // If variance is low, it's converging
+      if (variance < 0.1) {
+        func.asymptotes.push({
+          type: "horizontal",
+          x: null,
+          y: avgLeft,
+        });
+      }
+    }
+
+    // Check if right side converges
+    if (rightSamples.length >= 3) {
+      const avgRight = rightSamples.reduce((a, b) => a + b) / rightSamples.length;
+      const variance = rightSamples.reduce((sum, val) => sum + Math.pow(val - avgRight, 2), 0) / rightSamples.length;
+
+      // If variance is low, it's converging
+      if (variance < 0.1) {
+        // Check if this is different from left asymptote
+        const isDifferent = !func.asymptotes.some(a =>
+          a.type === "horizontal" && Math.abs(a.y - avgRight) < 0.1
+        );
+
+        if (isDifferent) {
+          func.asymptotes.push({
+            type: "horizontal",
+            x: null,
+            y: avgRight,
+          });
+        }
+      }
     }
 
     // Deduplicate asymptotes
