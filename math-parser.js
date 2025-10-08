@@ -25,6 +25,7 @@ class MathParser {
             'sec': (x) => 1 / Math.cos(x),
             'csc': (x) => 1 / Math.sin(x),
             'cot': (x) => 1 / Math.tan(x),
+            'logb': (base, value) => Math.log(value) / Math.log(base),
         };
         
         this.constants = {
@@ -75,6 +76,13 @@ class MathParser {
             // Operators and parentheses
             if ('+-*/^()'.includes(char)) {
                 tokens.push({ type: 'OPERATOR', value: char });
+                i++;
+                continue;
+            }
+            
+            // Comma for function arguments
+            if (char === ',') {
+                tokens.push({ type: 'COMMA', value: char });
                 i++;
                 continue;
             }
@@ -181,14 +189,25 @@ class MathParser {
                 // Check if it's a function call
                 if (peek() && peek().type === 'OPERATOR' && peek().value === '(') {
                     consume(); // consume '('
-                    const arg = parseExpression();
+                    const args = [];
+                    
+                    // Parse arguments
+                    if (!peek() || peek().value !== ')') {
+                        args.push(parseExpression());
+                        
+                        while (peek() && peek().type === 'COMMA') {
+                            consume(); // consume ','
+                            args.push(parseExpression());
+                        }
+                    }
+                    
                     if (!peek() || peek().value !== ')') {
                         throw new Error('Missing closing parenthesis');
                     }
                     consume(); // consume ')'
                     
                     if (this.functions[name]) {
-                        return this.functions[name](arg);
+                        return this.functions[name](...args);
                     }
                     throw new Error(`Unknown function: ${name}`);
                 }

@@ -8,22 +8,31 @@ An advanced web-based graphing calculator with automatic asymptote and discontin
 - 🎯 **Asymptote Detection**: Automatically identifies and highlights vertical and horizontal asymptotes
 - 🕳️ **Discontinuity Detection**: Detects and marks removable discontinuities (holes) in functions
 - ✏️ **Math Input**: Style math input with standard mathematical notation (x^2, sin(x), 1/x, etc.)
-- 🎨 **Color Customization**: Assign unique colors to each function for easy identification
+- 🎨 **Color Customization**: Each function automatically gets a unique color for easy identification
 - 🔍 **Interactive Tooltips**: Hover over the graph to see coordinate values
-- ⚙️ **Adjustable View**: Customize X and Y axis ranges to zoom in/out
+- ⚙️ **Pan & Zoom**: Click and drag to pan, use mouse wheel to zoom in/out
+- 🖱️ **Adjustable View**: Customize X and Y axis ranges manually or with interactive controls
 
 ## Usage
 
-Simply open `index.html` in a web browser. No build process or server required!
+Simply open `index.html` in a web browser, or visit the [GitHub Pages deployment](https://tnixc.github.io/grapher/). No build process or server required!
+
+### Controls
+
+- **Pan**: Click and drag on the graph to pan around
+- **Zoom**: Use mouse wheel to zoom in (scroll up) or zoom out (scroll down)
+- **Reset**: Click "Reset View" to return to the default -10 to 10 range
 
 ### Supported Functions
 
 The calculator supports standard mathematical expressions:
 
 - Basic operations: `+`, `-`, `*`, `/`, `^`
-- Trigonometric: `sin(x)`, `cos(x)`, `tan(x)`, `sec(x)`, `csc(x)`, `cot(x)`
+- Trigonometric: `sin(x)`, `cos(x)`, `tan(x)`
+- Secondary trig: `sec(x)`, `csc(x)`, `cot(x)`
 - Inverse trig: `asin(x)`, `acos(x)`, `atan(x)`
-- Logarithmic: `log(x)`, `ln(x)`, `log10(x)`
+- Hyperbolic: `sinh(x)`, `cosh(x)`, `tanh(x)`
+- Logarithmic: `log(x)`, `ln(x)`, `log10(x)`, `logb(base, x)`
 - Exponential: `exp(x)`, `e^x`
 - Absolute value: `abs(x)`
 - Square root: `sqrt(x)`
